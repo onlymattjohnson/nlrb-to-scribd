@@ -37,3 +37,5 @@ nosetests.xml
 # emacs
 *.*~
 
+# config files
+scribd_config_local.py

@@ -24,8 +24,15 @@ def xml_to_string(xml_link):
     # Section 20.6.21 is especially helpful
     return urlopen(xml_link).read()
 
-xml_link = 'http://www.nlrb.gov/rss/rssBoardDecisions.xml'
-xml_text = xml_to_string(xml_link)
+all_links = []
+all_links.append('http://www.nlrb.gov/rss/rssBoardDecisions.xml')
+all_links.append('http://www.nlrb.gov/rss/rssJudgesDecisions.xml')
+all_links.append('http://www.nlrb.gov/rss/rssRegionalDecisions.xml')
+all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
+all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
+all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
+
+xml_text = xml_to_string(all_links[10])
 root = ET.fromstring(xml_text)
 
 for item in root.iter('item'):
