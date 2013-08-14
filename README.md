@@ -31,4 +31,9 @@ Enter mongo shell by typing ```mongo```
 
 ```use nlrb```
 
+PyMongo
+-------
+```
+pip install pymongo
+```
 
