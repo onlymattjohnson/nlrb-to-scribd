@@ -93,17 +93,26 @@ def xml_to_string(xml_link):
     # Section 20.6.21 is especially helpful
     return urlopen(xml_link).read()
 
-xml_link = 'http://www.nlrb.gov/rss/rssBoardDecisions.xml'
-xml_text = xml_to_string(xml_link)
-root = ET.fromstring(xml_text)
+all_links = ['http://www.nlrb.gov/rss/rssBoardDecisions.xml',
+             'http://www.nlrb.gov/rss/rssRegionalDecisions.xml',
+             'http://www.nlrb.gov/rss/rssJudgesDecisions.xml',
+             'http://www.nlrb.gov/rss/rssAppellateCourt.xml',
+             'http://www.nlrb.gov/rss/rssGCMemos.xml',
+             'http://www.nlrb.gov/rss/rssOMMemos.xml']
 
-all_results = []
-for item in root.iter('item'):
-    all_results.append(get_case_info(item))
+for xml_link in all_links:
+    print 'Grabbing data from ' + xml_link
+    xml_text = xml_to_string(xml_link)
+    root = ET.fromstring(xml_text)
 
-counter = 1
-for document_info in all_results:
-    print 'Uploading ' + str(counter) + ' of ' + str(len(all_results))
-    upload_to_scribd(document_info)
-    counter += 1
+    all_results = []
+    for item in root.iter('item'):
+        all_results.append(get_case_info(item))
+
+    counter = 1
+    for document_info in all_results:
+        print 'Uploading ' + str(counter) + ' of ' + str(len(all_results))
+        print document_info['title']
+        upload_to_scribd(document_info)
+        counter += 1
 

@@ -9,6 +9,13 @@ I will be using some of these resources, I imagine:
 * https://code.google.com/p/python-scribd/
 * http://docs.python.org/2/library/xml.etree.elementtree.html
 
+Future
+======
+The long-term future of this project will be to be a better version of nlrb.gov
+
+I would like to create a front-end that allows you to pull cases by union name, employer name, type (ULP, DFR, election, etc.), legal counsel, etc.
+
+
 Install
 =======
 
