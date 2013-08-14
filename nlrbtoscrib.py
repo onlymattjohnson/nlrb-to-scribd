@@ -24,16 +24,13 @@ def xml_to_string(xml_link):
     # Section 20.6.21 is especially helpful
     return urlopen(xml_link).read()
 
-all_links = []
-all_links.append('http://www.nlrb.gov/rss/rssBoardDecisions.xml')
-all_links.append('http://www.nlrb.gov/rss/rssJudgesDecisions.xml')
-all_links.append('http://www.nlrb.gov/rss/rssRegionalDecisions.xml')
-all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
-all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
-all_links.append('http://www.nlrb.gov/rss/rssAppellateCourt.xml')
-
-xml_text = xml_to_string(all_links[10])
+xml_link = 'http://www.nlrb.gov/rss/rssBoardDecisions.xml'
+xml_text = xml_to_string(xml_link)
 root = ET.fromstring(xml_text)
 
+all_results = []
 for item in root.iter('item'):
-    print get_case_info(item)
+    all_results.append(get_case_info(item))
+
+## Test out uploading doc to scribd
+
