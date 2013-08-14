@@ -1,5 +1,10 @@
 from urllib import urlopen # to open the RSS feeds
 import xml.etree.ElementTree as ET # to parse XML
+import time
+import scribd
+import scribd_config_local
+from datetime import date
+import os
 
 def get_case_info(item):
     # Extracts info out of XML document
@@ -34,3 +39,22 @@ for item in root.iter('item'):
 
 ## Test out uploading doc to scribd
 
+f = open('temp.pdf', 'wb')
+f.write(urlopen(all_results[0]['pdf_link']).read())
+f.close()
+
+doc = scribd.api_user.upload(open('temp.pdf', 'rb'))
+while doc.get_conversion_status() != 'DONE' :
+    print 'Document conversion ' + doc.get_conversion_status()
+    time.sleep(2)
+
+doc.desription = all_results[0]['description']
+doc.access = 'public'
+doc.language = 'en'
+doc.title = all_results[0]['title']
+doc.when_published = date.today().isoformat()
+doc.save()
+
+os.remove('temp.pdf')
+
+print 'Complete'
