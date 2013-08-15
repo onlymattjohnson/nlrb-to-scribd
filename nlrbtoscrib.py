@@ -50,22 +50,15 @@ def get_case_info(item):
 
 def upload_to_scribd(document_info):
     # Check for already entered in db
-    print 'Checking for ' + document_info['guid'] + ' in database...'
-    
     if not check_mongo(document_info['guid']):
-        print document_info['guid'] + ' not found.  Proceeding with upload...'
-
-        print 'Opening temp file...'
         file_name = 'temp' + document_info["guid"] + '.pdf'
         # Open temp file    
         f = open(file_name, 'wb')
         f.write(urlopen(document_info['pdf_link']).read())
         f.close()
 
-        print 'Uploading file to Scribd...'
         doc = scribd.api_user.upload(open(file_name, 'rb'))
         while doc.get_conversion_status() != 'DONE' :
-            print 'Document ' + doc.get_conversion_status()
             time.sleep(2)
 
         # Processed, now add fields
@@ -76,43 +69,61 @@ def upload_to_scribd(document_info):
         doc.when_published = date.today().isoformat()
         doc.save()
             
-        print 'Removing temp file'
         try:
             os.remove(file_name)
-            print 'Temp file removed'
         except:
             print 'Could not remove temp file'
 
         # Enter into mongo
         insert_into_mongo(document_info)
+        return 1
     else:
         print 'Item already uploaded, moving on...'
+        return 0
 
 def xml_to_string(xml_link):
     # http://docs.python.org/2/library/urllib2.html
     # Section 20.6.21 is especially helpful
     return urlopen(xml_link).read()
 
-all_links = ['http://www.nlrb.gov/rss/rssBoardDecisions.xml',
-             'http://www.nlrb.gov/rss/rssRegionalDecisions.xml',
-             'http://www.nlrb.gov/rss/rssJudgesDecisions.xml',
-             'http://www.nlrb.gov/rss/rssAppellateCourt.xml',
-             'http://www.nlrb.gov/rss/rssGCMemos.xml',
-             'http://www.nlrb.gov/rss/rssOMMemos.xml']
 
+print '##################'
+print '# NLRB to Scribd #'
+print '##################'
+print '\n'
+
+pre_link = 'http://www.nlrb.gov/rss/'
+all_links = []
+all_links.append({'name': 'Board Decisions', 'link': pre_link + 'rssBoardDecisions.xml'})
+all_links.append({'name': 'Regional Decisions', 'link': pre_link + 'rssRegionalDecisions.xml'})
+all_links.append({'name': 'ALJ Decisions', 'link': pre_link + 'rssJudgesDecisions.xml'})
+all_links.append({'name': 'Appellate Court Decisions', 'link': pre_link + 'rssAppellateCourt.xml'})
+all_links.append({'name': 'General Counsel Memos', 'link': pre_link + 'rssGCMemos.xml'})
+all_links.append({'name': 'Operational Memos', 'link': pre_link + 'rssOMMemos.xml'})
+
+#all_links = ['http://www.nlrb.gov/rss/rssBoardDecisions.xml',
+#             'http://www.nlrb.gov/rss/rssRegionalDecisions.xml',
+#             'http://www.nlrb.gov/rss/rssJudgesDecisions.xml',
+#             'http://www.nlrb.gov/rss/rssAppellateCourt.xml',
+#             'http://www.nlrb.gov/rss/rssGCMemos.xml',
+#             'http://www.nlrb.gov/rss/rssOMMemos.xml']
+
+count_results = {}
 for xml_link in all_links:
-    print 'Grabbing data from ' + xml_link
-    xml_text = xml_to_string(xml_link)
+    print 'Downloading ' + xml_link['name'] + ' documents'
+    xml_text = xml_to_string(xml_link['link'])
     root = ET.fromstring(xml_text)
+    count_results[xml_link['name']] = 0
 
     all_results = []
     for item in root.iter('item'):
         all_results.append(get_case_info(item))
-
-    counter = 1
+    
+    
     for document_info in all_results:
-        print 'Uploading ' + str(counter) + ' of ' + str(len(all_results))
-        print document_info['title']
-        upload_to_scribd(document_info)
-        counter += 1
+        print 'Attempting upload of ' + document_info['title']
+        count_results[xml_link['name']] += upload_to_scribd(document_info)
 
+print 'Processing complete.'
+for item_name, item_count in count_results.iteritems():
+    print item_name + ' : ' + str(item_count) + ' new uploads.'
